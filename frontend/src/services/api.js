@@ -1,4 +1,5 @@
-const BASE_URL = '/api';
+const RAW_BASE = import.meta.env.VITE_API_URL || '';
+const BASE_URL = RAW_BASE ? (RAW_BASE.endsWith('/') ? RAW_BASE.slice(0, -1) : RAW_BASE) + '/api' : '/api';
 
 export const api = async (endpoint, options = {}) => {
   const token = localStorage.getItem('placement_token');
