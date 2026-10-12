@@ -38,10 +38,11 @@ export const AdminDashboard = ({ setActiveTab }) => {
         adminService.getStats(),
         adminService.getAnnouncements()
       ]);
-      setStats(statsData);
-      setAnnouncements(noticesData || []);
+      setStats(statsData && typeof statsData === 'object' ? statsData : null);
+      setAnnouncements(Array.isArray(noticesData) ? noticesData : []);
     } catch (err) {
-      console.error(err);
+      console.warn('Admin load error:', err);
+      setAnnouncements([]);
     } finally {
       setLoading(false);
     }
@@ -176,7 +177,7 @@ export const AdminDashboard = ({ setActiveTab }) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {announcements.map(a => (
+            {(Array.isArray(announcements) ? announcements : []).map(a => (
               <AnnouncementCard
                 key={a.id}
                 announcement={a}

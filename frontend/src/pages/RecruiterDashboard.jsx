@@ -34,20 +34,24 @@ export const RecruiterDashboard = ({ setActiveTab, onSelectJobToManage }) => {
         jobService.getRecruiterJobs().catch(() => []),
         applicationService.getCompanyApplications().catch(() => [])
       ]);
-      setProfile(prof);
-      setJobs(jobList || []);
-      setApplications(appList || []);
+      setProfile(prof && typeof prof === 'object' ? prof : null);
+      setJobs(Array.isArray(jobList) ? jobList : []);
+      setApplications(Array.isArray(appList) ? appList : []);
     } catch (err) {
-      console.error(err);
+      console.warn('RecruiterDashboard load error:', err);
+      setJobs([]);
+      setApplications([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const totalJobs = jobs.length;
-  const totalApplicants = applications.length;
-  const shortlisted = applications.filter(a => a.status === 'SHORTLISTED' || a.status === 'TECHNICAL_ROUND' || a.status === 'HR_ROUND').length;
-  const offersGiven = applications.filter(a => a.status === 'SELECTED').length;
+  const safeJobs = Array.isArray(jobs) ? jobs : [];
+  const safeApps = Array.isArray(applications) ? applications : [];
+  const totalJobs = safeJobs.length;
+  const totalApplicants = safeApps.length;
+  const shortlisted = safeApps.filter(a => a.status === 'SHORTLISTED' || a.status === 'TECHNICAL_ROUND' || a.status === 'HR_ROUND').length;
+  const offersGiven = safeApps.filter(a => a.status === 'SELECTED').length;
 
   return (
     <div className="page-container animate-fade-in">

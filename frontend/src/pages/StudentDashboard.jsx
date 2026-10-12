@@ -45,12 +45,15 @@ export const StudentDashboard = ({ setActiveTab }) => {
         applicationService.getMyApplications().catch(() => []),
         adminService.getAnnouncements().catch(() => [])
       ]);
-      setProfile(profileData);
-      setJobs(jobsData || []);
-      setApplications(appsData || []);
-      setAnnouncements(noticesData || []);
+      setProfile(profileData && typeof profileData === 'object' ? profileData : null);
+      setJobs(Array.isArray(jobsData) ? jobsData : []);
+      setApplications(Array.isArray(appsData) ? appsData : []);
+      setAnnouncements(Array.isArray(noticesData) ? noticesData : []);
     } catch (err) {
-      console.error(err);
+      console.warn('Dashboard load error:', err);
+      setJobs([]);
+      setApplications([]);
+      setAnnouncements([]);
     } finally {
       setLoading(false);
     }
@@ -68,10 +71,11 @@ export const StudentDashboard = ({ setActiveTab }) => {
     }
   };
 
-  const totalApplied = applications.length;
-  const shortlistedCount = applications.filter(a => a.status === 'SHORTLISTED').length;
-  const inRoundsCount = applications.filter(a => a.status === 'TECHNICAL_ROUND' || a.status === 'HR_ROUND').length;
-  const offersCount = applications.filter(a => a.status === 'SELECTED').length;
+  const safeApps = Array.isArray(applications) ? applications : [];
+  const totalApplied = safeApps.length;
+  const shortlistedCount = safeApps.filter(a => a.status === 'SHORTLISTED').length;
+  const inRoundsCount = safeApps.filter(a => a.status === 'TECHNICAL_ROUND' || a.status === 'HR_ROUND').length;
+  const offersCount = safeApps.filter(a => a.status === 'SELECTED').length;
 
   return (
     <div className="page-container animate-fade-in">
@@ -173,7 +177,7 @@ export const StudentDashboard = ({ setActiveTab }) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            {jobs.slice(0, 3).map(job => (
+            {(Array.isArray(jobs) ? jobs : []).slice(0, 3).map(job => (
               <JobCard
                 key={job.id}
                 job={job}
@@ -182,7 +186,7 @@ export const StudentDashboard = ({ setActiveTab }) => {
                 onViewDetails={(j) => setSelectedJob(j)}
               />
             ))}
-            {jobs.length === 0 && (
+            {(!jobs || jobs.length === 0) && (
               <div className="glass-panel" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 No active placement drives found.
               </div>
@@ -203,14 +207,14 @@ export const StudentDashboard = ({ setActiveTab }) => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {announcements.slice(0, 3).map(a => (
+            {(Array.isArray(announcements) ? announcements : []).slice(0, 3).map(a => (
               <AnnouncementCard
                 key={a.id}
                 announcement={a}
                 isAdmin={false}
               />
             ))}
-            {announcements.length === 0 && (
+            {(!announcements || announcements.length === 0) && (
               <div className="glass-panel" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 No announcements at this time.
               </div>

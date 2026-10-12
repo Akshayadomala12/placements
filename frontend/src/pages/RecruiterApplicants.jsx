@@ -33,10 +33,12 @@ export const RecruiterApplicants = ({ selectedJobFilter }) => {
         applicationService.getCompanyApplications(),
         jobService.getRecruiterJobs()
       ]);
-      setApplications(apps || []);
-      setJobs(jobList || []);
+      setApplications(Array.isArray(apps) ? apps : []);
+      setJobs(Array.isArray(jobList) ? jobList : []);
     } catch (err) {
-      console.error(err);
+      console.warn('Recruiter load error:', err);
+      setApplications([]);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,8 @@ export const RecruiterApplicants = ({ selectedJobFilter }) => {
     }
   };
 
-  const filteredApps = applications.filter(app => {
+  const safeApps = Array.isArray(applications) ? applications : [];
+  const filteredApps = safeApps.filter(app => {
     const matchesJob = selectedJobId === 'ALL' || app.job?.id?.toString() === selectedJobId;
     const matchesStage = stageFilter === 'ALL' || app.status === stageFilter;
     const matchesSearch = !searchTerm ||

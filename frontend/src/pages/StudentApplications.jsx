@@ -17,9 +17,10 @@ export const StudentApplications = () => {
     setLoading(true);
     try {
       const data = await applicationService.getMyApplications();
-      setApplications(data || []);
+      setApplications(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.warn('Load applications error:', err);
+      setApplications([]);
     } finally {
       setLoading(false);
     }
@@ -36,10 +37,11 @@ export const StudentApplications = () => {
     }
   };
 
-  const appliedCount = applications.filter(a => a.status === 'APPLIED').length;
-  const shortlistedCount = applications.filter(a => a.status === 'SHORTLISTED' || a.status === 'TECHNICAL_ROUND' || a.status === 'HR_ROUND').length;
-  const selectedCount = applications.filter(a => a.status === 'SELECTED').length;
-  const rejectedCount = applications.filter(a => a.status === 'REJECTED').length;
+  const safeApps = Array.isArray(applications) ? applications : [];
+  const appliedCount = safeApps.filter(a => a.status === 'APPLIED').length;
+  const shortlistedCount = safeApps.filter(a => a.status === 'SHORTLISTED' || a.status === 'TECHNICAL_ROUND' || a.status === 'HR_ROUND').length;
+  const selectedCount = safeApps.filter(a => a.status === 'SELECTED').length;
+  const rejectedCount = safeApps.filter(a => a.status === 'REJECTED').length;
 
   return (
     <div className="page-container animate-fade-in">

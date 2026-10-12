@@ -32,9 +32,10 @@ export const StudentJobs = () => {
     setLoading(true);
     try {
       const data = isStudent ? await jobService.getStudentJobs() : await jobService.getAllJobs();
-      setJobs(data || []);
+      setJobs(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.warn('API error loading jobs:', err);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ export const StudentJobs = () => {
     }
   };
 
-  const filteredJobs = jobs.filter(job => {
+  const filteredJobs = (Array.isArray(jobs) ? jobs : []).filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(search.toLowerCase()) ||
                           job.companyName.toLowerCase().includes(search.toLowerCase()) ||
                           job.location.toLowerCase().includes(search.toLowerCase());

@@ -32,11 +32,14 @@ export const AdminUserManagement = () => {
         adminService.getAllStudents(),
         adminService.getAllCompanies()
       ]);
-      setUsers(usersData || []);
-      setStudents(studentsData || []);
-      setCompanies(companiesData || []);
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      setCompanies(Array.isArray(companiesData) ? companiesData : []);
     } catch (err) {
-      console.error(err);
+      console.warn('AdminUserManagement load error:', err);
+      setUsers([]);
+      setStudents([]);
+      setCompanies([]);
     } finally {
       setLoading(false);
     }
@@ -124,8 +127,8 @@ export const AdminUserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {users
-                .filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()))
+              {(Array.isArray(users) ? users : [])
+                .filter(u => (u.name || '').toLowerCase().includes(search.toLowerCase()) || (u.email || '').toLowerCase().includes(search.toLowerCase()))
                 .map(user => (
                   <tr key={user.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                     <td style={{ padding: '16px 20px', fontWeight: 600 }}>{user.name}</td>
@@ -177,8 +180,8 @@ export const AdminUserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {students
-                .filter(s => s.name?.toLowerCase().includes(search.toLowerCase()) || s.rollNumber?.toLowerCase().includes(search.toLowerCase()))
+              {(Array.isArray(students) ? students : [])
+                .filter(s => (s.name || '').toLowerCase().includes(search.toLowerCase()) || (s.rollNumber || '').toLowerCase().includes(search.toLowerCase()))
                 .map(student => (
                   <tr key={student.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                     <td style={{ padding: '16px 20px', fontWeight: 600 }}>
@@ -210,8 +213,8 @@ export const AdminUserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {companies
-                .filter(c => c.companyName?.toLowerCase().includes(search.toLowerCase()) || c.industry?.toLowerCase().includes(search.toLowerCase()))
+              {(Array.isArray(companies) ? companies : [])
+                .filter(c => (c.companyName || '').toLowerCase().includes(search.toLowerCase()) || (c.industry || '').toLowerCase().includes(search.toLowerCase()))
                 .map(comp => (
                   <tr key={comp.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                     <td style={{ padding: '16px 20px', fontWeight: 700, color: 'var(--accent-primary)' }}>

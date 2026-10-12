@@ -20,9 +20,10 @@ export const AnnouncementsPage = () => {
     setLoading(true);
     try {
       const data = await adminService.getAnnouncements();
-      setAnnouncements(data || []);
+      setAnnouncements(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.warn('Announcements error:', err);
+      setAnnouncements([]);
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,7 @@ export const AnnouncementsPage = () => {
     }
   };
 
-  const filtered = announcements.filter(a => {
+  const filtered = (Array.isArray(announcements) ? announcements : []).filter(a => {
     if (filter === 'ALL') return true;
     return a.category === filter;
   });

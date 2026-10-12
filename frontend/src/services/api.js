@@ -30,12 +30,16 @@ export const api = async (endpoint, options = {}) => {
     }
   }
 
-  const contentType = response.headers.get('content-type');
+  const contentType = response.headers.get('content-type') || '';
   let data = null;
-  if (contentType && contentType.includes('application/json')) {
+  if (contentType.includes('application/json')) {
     data = await response.json();
   } else {
-    data = await response.text();
+    const text = await response.text();
+    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+      throw new Error('Backend API not connected or returned HTML. Please configure VITE_API_URL or run the backend.');
+    }
+    data = text;
   }
 
   if (!response.ok) {
