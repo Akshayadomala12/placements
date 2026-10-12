@@ -19,7 +19,12 @@ export const api = async (endpoint, options = {}) => {
     config.body = JSON.stringify(config.body);
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, config);
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}${endpoint}`, config);
+  } catch (err) {
+    throw new Error(`Unable to reach backend server at ${BASE_URL || window.location.origin}. Please ensure the backend is running or set VITE_API_URL.`);
+  }
 
   if (response.status === 401) {
     // If token expired or invalid, clear token
@@ -33,17 +38,38 @@ export const api = async (endpoint, options = {}) => {
   const contentType = response.headers.get('content-type') || '';
   let data = null;
   if (contentType.includes('application/json')) {
-    data = await response.json();
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
   } else {
     const text = await response.text();
     if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-      throw new Error('Backend API not connected or returned HTML. Please configure VITE_API_URL or run the backend.');
+      throw new Error(`Backend API not reachable (Received HTML page from ${BASE_URL || window.location.origin}). Please connect a live Spring Boot backend or configure VITE_API_URL.`);
     }
     data = text;
   }
 
   if (!response.ok) {
-    const errorMsg = (data && data.error) || (data && data.message) || response.statusText || 'Request failed';
+    let errorMsg = null;
+    if (data && typeof data === 'object') {
+      if (data.error) errorMsg = data.error;
+      else if (data.message) errorMsg = data.message;
+      else if (Array.isArray(data.errors) && data.errors.length > 0) {
+        errorMsg = data.errors.map(e => e.defaultMessage || e.message || JSON.stringify(e)).join(', ');
+      }
+    } else if (typeof data === 'string' && data.trim()) {
+      errorMsg = data;
+    }
+
+    if (!errorMsg) {
+      if (response.status === 405 || response.status === 404) {
+        errorMsg = `Backend endpoint not found (${response.status} on ${BASE_URL || window.location.origin}). Please verify the backend is deployed on Render and VITE_API_URL is configured.`;
+      } else {
+        errorMsg = response.statusText || `Request failed with status ${response.status}`;
+      }
+    }
     throw new Error(errorMsg);
   }
 
