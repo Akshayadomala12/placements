@@ -1,23 +1,27 @@
 services:
-  # 1. Spring Boot Backend REST API
+  # 1. Spring Boot Backend Web Service
   - type: web
     name: placement-backend
     runtime: docker
-    dockerfilePath: backend/Dockerfile
-    dockerContext: backend
-    plan: free
+    branch: main
+    autoDeploy: true
     region: oregon
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     envVars:
       - key: PORT
-        value: 8080
+        value: 10000
 
-  # 2. React Vite Frontend
+  # 2. React Vite Frontend Static Site
   - type: web
     name: placement-frontend
     runtime: static
+    branch: main
+    autoDeploy: true
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
